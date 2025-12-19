@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin - Giá vàng</title>
+  <style>
+    :root{
+      --bg:#050b15;
+      --card:#0b1a33;
+      --border:#223e69;
+      --text:#eaf2ff;
+      --muted:#c8d4ea;
+      --btn:#2b7bff;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    }
+    body{ margin:0; background:var(--bg); color:var(--text); }
+    .wrap{ max-width: 860px; margin: 0 auto; padding: 18px; }
+    h1{ margin: 6px 0 10px; font-size: 20px; }
+    .card{
+      background: linear-gradient(180deg, #0b1a33, #071224);
+      border: 2px solid var(--border);
+      border-radius: 16px;
+      padding: 14px;
+      box-shadow: 0 14px 30px rgba(0,0,0,.35);
+    }
+    label{ display:block; font-size: 12px; color:var(--muted); margin:10px 0 6px; font-weight:800; }
+    input{
+      width:93%;
+      padding: 11px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background:#071427;
+      color:var(--text);
+      font-size: 14px;
+      outline:none;
+    }
+    table{ width:100%; border-collapse:collapse; margin-top: 10px; }
+    th, td{ border-top: 1px solid rgba(255,255,255,.12); padding: 8px; }
+    th{ text-align:left; font-size:12px; color:var(--muted); }
+    td input{ padding: 9px 10px; border-radius: 10px; font-size: 14px; }
+    .row{ 
+      display:grid; 
+      /*grid-template-columns: 1fr 1fr; */
+      gap: 10px; 
+    }
+    .actions{ display:flex; gap: 10px; margin-top: 12px; flex-wrap:wrap; }
+    button{
+      border:0; border-radius: 12px;
+      padding: 11px 14px;
+      font-weight: 900;
+      color: white;
+      background: var(--btn);
+      cursor:pointer;
+      width: 150px;
+      height: 50px;
+    }
+    button.secondary{ background: rgba(255,255,255,.12); color: var(--text); }
+    button.danger{ background: rgba(255,45,45,.88); }
+    .status{ margin-top: 10px; font-size: 13px; color: var(--muted); }
+    .hint{ margin-top: 6px; font-size: 12px; color: rgba(255,255,255,.55); }
+    .hidden {
+      /*display: none;*/
+      display: none;
+    }
+    .gia-tien {
+      width: 85%;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Cập nhật bảng giá vàng</h1>
+    <div class="card">
+      <div class="row hidden">
+        <div>
+          <label>Tên doanh nghiệp</label>
+          <input id="company" placeholder="DNTN KINH DOANH VÀNG ..." />
+        </div>
+      </div>
+      <div class="row hidden">
+        <div>
+          <label>Đơn vị</label>
+          <input id="unit" placeholder="VND/chi" />
+        </div>
+      </div>
+
+      <div class="row hidden">
+        <div>
+          <label>Tiêu đề trên</label>
+          <input id="title" placeholder="BẢNG GIÁ VÀNG" />
+        </div>
+      </div>
+      <div class="row hidden">
+        <div>
+          <label>Tiêu đề dưới</label>
+          <input id="note" placeholder="Kính Chào Quý Khách!" />
+        </div>
+      </div>
+
+      <label>Danh sách giá</label>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:56%">Loại vàng</th>
+            <th style="width:22%">Mua vào</th>
+            <th style="width:22%">Bán ra</th>
+            <th style="width:0%" class="hidden"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div class="actions hidden">
+        <button class="secondary" id="addRow">+ Thêm dòng</button>
+      </div>
+
+      <div class="row hidden">
+        <div>
+          <label>Ảnh bên phải (đường dẫn)</label>
+          <input id="rightImage" placeholder="/assets/right-logo.jpg" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Admin key</label>
+          <input id="key" type="password" placeholder="Nhập mật mã admin trước khi cập nhật" />
+        </div>
+      </div>
+
+
+      <div class="actions">
+        <button id="save">Cập nhật lên TV</button>
+        <button class="secondary" id="reload">Tải lại</button>
+      </div>
+
+      <div class="status" id="status">—</div>
+      <div class="hint">Mở /tv.html trên TV (F11 để toàn màn hình). Khi bấm “Cập nhật”, TV sẽ đổi ngay.</div>
+    </div>
+  </div>
+
+  <script>
+    const tbody = document.getElementById("tbody");
+    const statusEl = document.getElementById("status");
+    const companyEl = document.getElementById("company");
+    const titleEl = document.getElementById("title");
+    const unitEl = document.getElementById("unit");
+    const noteEl = document.getElementById("note");
+    const keyEl = document.getElementById("key");
+    const rightImageEl = document.getElementById("rightImage");
+
+    function setStatus(msg){ statusEl.textContent = msg; }
+
+    function createRow(item = { type:"", buy:"", sell:"" }){
+      const tr = document.createElement("tr");
+
+      const tdType = document.createElement("td");
+      const inType = document.createElement("input");
+      inType.value = item.type ?? "";
+      // inType.placeholder = "9999 / 99 / ...";
+      tdType.appendChild(inType);
+
+      const tdBuy = document.createElement("td");
+      const inBuy = document.createElement("input");
+      inBuy.inputMode = "numeric";
+      inBuy.value = item.buy ?? "";
+      inBuy.className = "gia-tien"
+      // inBuy.placeholder = "14200";
+      tdBuy.appendChild(inBuy);
+
+      const tdSell = document.createElement("td");
+      const inSell = document.createElement("input");
+      inSell.inputMode = "numeric";
+      inSell.className = "gia-tien"
+      inSell.value = item.sell ?? "";
+      // inSell.placeholder = "14500";
+      tdSell.appendChild(inSell);
+
+      const tdDel = document.createElement("td");
+      const del = document.createElement("button");
+      del.className = "danger hidden";
+      del.textContent = "X";
+      del.type = "button";
+      del.style.width = "100%";
+      del.onclick = () => tr.remove();
+      tdDel.appendChild(del);
+
+      tr.appendChild(tdType);
+      tr.appendChild(tdBuy);
+      tr.appendChild(tdSell);
+      tr.appendChild(tdDel);
+
+      tbody.appendChild(tr);
+    }
+
+    function readRows(){
+      const rows = [];
+      for (const tr of tbody.querySelectorAll("tr")){
+        const inputs = tr.querySelectorAll("input");
+        const type = (inputs[0]?.value || "").trim();
+        const buy = Number(String(inputs[1]?.value || "").replaceAll(".", "").replaceAll(",", ""));
+        const sell = Number(String(inputs[2]?.value || "").replaceAll(".", "").replaceAll(",", ""));
+        if (!type) continue;
+        if (!Number.isFinite(buy) || !Number.isFinite(sell)) continue;
+        rows.push({ type, buy, sell });
+      }
+      return rows;
+    }
+
+    async function load(){
+      tbody.innerHTML = "";
+      try{
+        const res = await fetch("/api/state");
+        const j = await res.json();
+        const s = j.data;
+        companyEl.value = s.company || "";
+        titleEl.value = s.title || "";
+        unitEl.value = s.unit || "";
+        noteEl.value = s.note || "";
+        rightImageEl.value = s.rightImage || "/assets/right-logo.jpg";
+        (s.items || []).forEach(createRow);
+        if (!(s.items || []).length) createRow();
+        setStatus("Đã tải dữ liệu hiện tại.");
+      }catch(e){
+        setStatus("Không tải được trạng thái. " + (e?.message || ""));
+        createRow();
+      }
+    }
+
+    document.getElementById("addRow").onclick = () => createRow();
+    document.getElementById("reload").onclick = load;
+
+    document.getElementById("save").onclick = async () => {
+      const payload = {
+        key: keyEl.value,
+        company: companyEl.value,
+        title: titleEl.value,
+        unit: unitEl.value,
+        note: noteEl.value,
+        rightImage: rightImageEl.value,
+        items: readRows()
+      };
+
+      try{
+        const res = await fetch("/api/update", {
+          method:"POST",
+          headers:{ "Content-Type":"application/json" },
+          body: JSON.stringify(payload)
+        });
+        const j = await res.json();
+        if (!j.ok) throw new Error(j.error || "Update failed");
+        setStatus("✅ Cập nhật thành công. TV đã nhận dữ liệu mới.");
+      }catch(e){
+        setStatus("❌ " + (e?.message || "Lỗi không xác định") + " (Có thể bạn đã quên điền mật mã admin)");
+      }
+    };
+
+    load();
+  </script>
+</body>
+</html>

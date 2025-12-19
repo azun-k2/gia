@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bảng giá vàng - TV</title>
+  <style>
+    :root{
+      --bg:#050b15;
+      --panel:#0a1528;
+      --panel2:#071224;
+      --border:#223e69;
+      --green:#ffff7f;
+      --green2:#ffff00;
+      --green3:#ffffff;
+      --green4:#e0ffff;
+      --text:#eaf2ff;
+      --muted:#c8d4ea;
+      --red:#ff2d2d;
+      --grid:rgba(255,255,255,.14);
+      --shadow:rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      background: radial-gradient(1100px 700px at 20% 10%, #123061 0%, var(--bg) 55%);
+      color:var(--text);
+      font-family: Arial, Helvetica, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      overflow:hidden;
+    }
+    .outer{
+      height:100vh;
+      padding:18px;
+    }
+
+    /* top header like the screen */
+    .header{
+      background: linear-gradient(180deg, #0a1733 0%, #071128 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 18px 10px;
+      box-shadow: 0 18px 30px var(--shadow);
+      position:relative;
+    }
+    .brandRow{
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logoBadge{
+      width:46px;height:46px;border-radius:10px;
+      background: linear-gradient(135deg, #f7d25b, #c98b10);
+      color:#251300;
+      display:grid;place-items:center;
+      font-weight:1000;
+      box-shadow: 0 10px 20px rgba(0,0,0,.35);
+      flex:0 0 auto;
+    }
+    .company{
+      width: 100%;
+      text-align: center;
+      font-weight:900;
+      font-size:46px;
+      letter-spacing:.8px;
+      text-transform:uppercase;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .mainTitle{
+      text-align:center;
+      font-weight:1000;
+      font-size:44px;
+      letter-spacing:1px;
+      margin-top:20px;
+      text-transform:uppercase;
+    }
+
+    .content{
+      margin-top:14px;
+      /*height: calc(100vh - 18px - 18px - 112px);*/
+      display:grid;
+      grid-template-columns: 1.55fr .72fr;
+      gap:14px;
+      min-height: 520px;
+    }
+
+    .tableWrap{
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      overflow:hidden;
+      box-shadow: 0 18px 30px var(--shadow);
+    }
+
+    table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+    thead th{
+      background: linear-gradient(180deg, var(--green), var(--green2));
+      color:#101a2c;
+      font-weight:1000;
+      font-size:36px;
+      padding:12px 10px;
+      border-right: 2px solid rgba(0,0,0,.25);
+      text-transform:uppercase;
+    }
+    thead th:last-child{ border-right:0; }
+    tbody td{
+      color:#101a2c;
+      border-top: 2px solid var(--grid);
+      border-right: 2px solid var(--grid);
+      padding: 10px 12px;
+      font-size:38px;
+      background: linear-gradient(180deg, var(--green3), var(--green4));
+      border-top: 2px solid rgba(0,0,0,.25);
+      border-right: 2px solid rgba(0,0,0,.25);
+    }
+    tbody tr:nth-child(even) td{ 
+      /*background: linear-gradient(180deg, var(--green), var(--green3));*/
+      border-top: 2px solid rgba(0,0,0,.25);
+      border-right: 2px solid rgba(0,0,0,.25);
+    }
+    tbody td:last-child{ border-right:0; }
+
+    .c-type{ 
+      width:44%; 
+      font-weight:900; 
+      text-transform:uppercase; 
+      text-align: center;
+    }
+    .c-buy, .c-sell{ width:28%; }
+
+    /* 7-seg-ish red digits */
+    .digits{
+      text-align:center;
+      font-weight:1000;
+      font-size:60px;
+      color: var(--red);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      letter-spacing: 1px;
+      text-shadow:
+        0 0 2px rgba(255,45,45,.85),
+        0 0 14px rgba(255,45,45,.22);
+    }
+
+    .right{
+      background: linear-gradient(180deg, var(--panel) 0%, var(--panel2) 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      box-shadow: 0 18px 30px var(--shadow);
+      overflow:hidden;
+    }
+    .metaLine{
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      color:var(--muted);
+      font-weight:900;
+      font-size:18px;
+      gap:10px;
+    }
+    .metaVal{
+      color:var(--text);
+      font-weight:1000;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      letter-spacing:.5px;
+      font-size:20px;
+      white-space:nowrap;
+    }
+
+    .imgBox{
+      flex:1;
+      border-radius:10px;
+      border: 2px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.02);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      max-height: 300px;
+    }
+    .imgBox img{
+      /*width:100%;
+      height:100%;*/
+      object-fit:cover;
+      filter: contrast(1.05) saturate(1.05);
+    }
+
+    .logoBox{
+      flex:1;
+      border-radius:10px;
+      border: 2px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.02);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height: 50px;
+    }
+
+    .logoBox img{
+      width:50px;
+      height:50px;
+      object-fit:cover;
+      filter: contrast(1.05) saturate(1.05);
+    }
+
+    .shopLogo{
+      width:50px;
+      height:50px;
+      object-fit:cover;
+      filter: contrast(1.05) saturate(1.05);
+    }
+
+    .footer{
+      margin-top:14px;
+      background: linear-gradient(180deg, #0a1733 0%, #071128 100%);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-weight:1000;
+      font-size:34px;
+      text-align:center;
+      letter-spacing:.7px;
+      box-shadow: 0 18px 30px var(--shadow);
+    }
+
+    @media (max-width: 1200px){
+      .mainTitle{ font-size:36px; }
+      .company{ font-size:36px; }
+      thead th{ font-size:22px; }
+      tbody td{ font-size:24px; }
+      .digits{ font-size:40px; }
+      .footer{ font-size:28px; }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="outer">
+    <div class="header">
+      <div class="brandRow">
+          <img class="shopLogo" src="/assets/shop-logo.png" alt="Shop logo" />
+        <div class="company" id="company">DNTN KINH DOANH VÀNG ...</div>
+      </div>
+      <div class="mainTitle" id="title">BẢNG GIÁ VÀNG</div>
+    </div>
+
+    <div class="content">
+      <div class="tableWrap">
+        <table>
+          <thead>
+            <tr>
+              <th class="c-type">LOẠI VÀNG</th>
+              <th class="c-buy">MUA VÀO</th>
+              <th class="c-sell">BÁN RA</th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+
+      <div class="right">
+        <div class="metaLine">
+          <div>ĐVị tính: <span id="unit">VNĐ/chỉ</span></div>
+          <div class="metaVal hidden" id="clock">--:--</div>
+        </div>
+        <div class="metaLine hidden">
+          <div>Ngày:</div>
+          <div class="metaVal" id="date">--/--/----</div>
+        </div>
+        <div class="metaLine">
+          <div class="hidden">Cập nhật:</div>
+          <div class="metaVal" id="updatedAt">--</div>
+        </div>
+
+        <div class="imgBox">
+          <img id="rightImg" src="/assets/right-logo.jpg" alt="Right logo" />
+        </div>
+      </div>
+    </div>
+
+    <div class="footer" id="note">Kính Chào Quý Khách !</div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const elCompany = document.getElementById("company");
+    const elTitle = document.getElementById("title");
+    const elUnit = document.getElementById("unit");
+    const elRows = document.getElementById("rows");
+    const elUpdatedAt = document.getElementById("updatedAt");
+    const elNote = document.getElementById("note");
+    const elClock = document.getElementById("clock");
+    const elDate = document.getElementById("date");
+    const elRightImg = document.getElementById("rightImg");
+
+    function formatPrice(n){
+      return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    function tick(){
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      elClock.textContent = `${hh}:${mm}`;
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mo = String(d.getMonth()+1).padStart(2,'0');
+      const yy = d.getFullYear();
+      elDate.textContent = `${dd}-${mo}-${yy}`;
+    }
+    tick();
+    setInterval(tick, 1000);
+
+    function render(state){
+      elCompany.textContent = state.company || "";
+      elTitle.textContent = state.title || "BẢNG GIÁ VÀNG";
+      elUnit.textContent = state.unit || "";
+
+      const u = new Date(state.updatedAt);
+      elUpdatedAt.textContent = u.toLocaleString("vi-VN");
+
+      elNote.textContent = state.note || "";
+
+      if (state.rightImage) elRightImg.src = state.rightImage;
+
+      elRows.innerHTML = "";
+      (state.items || []).forEach((it) => {
+        const tr = document.createElement("tr");
+
+        const tdType = document.createElement("td");
+        tdType.className = "c-type";
+        tdType.textContent = it.type;
+
+        const tdBuy = document.createElement("td");
+        tdBuy.className = "digits c-buy";
+        tdBuy.textContent = formatPrice(it.buy);
+
+        const tdSell = document.createElement("td");
+        tdSell.className = "digits c-sell";
+        tdSell.textContent = formatPrice(it.sell);
+
+        tr.appendChild(tdType);
+        tr.appendChild(tdBuy);
+        tr.appendChild(tdSell);
+        elRows.appendChild(tr);
+      });
+    }
+
+    fetch("/api/state").then(r=>r.json()).then(j=>render(j.data)).catch(()=>{});
+    const socket = io();
+    socket.on("gold:update", render);
+  </script>
+</body>
+</html>
