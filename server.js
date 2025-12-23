@@ -9,10 +9,13 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 app.use(express.json());
-app.use(express.static("public"));
+const STATIC_DIR = path.join(__dirname, "public");
+app.use(express.static(STATIC_DIR));
 
 const ADMIN_KEY = process.env.ADMIN_KEY || "123456";
-const DATA_FILE = path.join(__dirname, "data.json");
+const DATA_DIR = process.env.GOLD_TV_DATA_DIR || (process.pkg ? process.cwd() : __dirname);
+fs.mkdirSync(DATA_DIR, { recursive: true });
+const DATA_FILE = path.join(DATA_DIR, "data.json");
 
 /* ---------- helpers ---------- */
 function decodeData(raw) {
